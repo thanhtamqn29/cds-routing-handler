@@ -1,96 +1,123 @@
-export namespace cap.bookshop.typescript {
-    export interface IAuthor extends IManaged {
-        ID: number;
-        name: string;
-        dateOfBirth: Date;
-        dateOfDeath: Date;
-        placeOfBirth: string;
-        placeOfDeath: string;
-        books?: IBook[];
+export namespace vacation {
+    export enum Role {
+        staff,
+        manager,
     }
 
-    export interface IBook extends IManaged {
-        ID: number;
-        title: string;
-        descr: string;
-        author?: IAuthor;
-        author_ID?: number;
-        genre?: IGenre;
-        genre_ID?: number;
-        stock: number;
-        price: number;
-        currency: sap.common.ICurrencies;
-        currency_code?: string;
+    export enum Status {
+        pending,
+        accepted,
+        rejected,
     }
 
-    export interface IGenre extends sap.common.ICodeList {
-        ID: number;
-        parent?: IGenre;
-        parent_ID?: number;
-        children: IGenre[];
+    export interface IUsers {
+        ID: string;
+        createdAt?: Date;
+        createdBy?: string;
+        modifiedAt?: Date;
+        modifiedBy?: string;
+        username: string;
+        password: string;
+        fullName: string;
+        isActive?: boolean;
+        address: string;
+        role?: Role;
+        refreshToken: string;
+        dayOffThisYear?: number;
+        dayOffLastYear?: number;
+        requests?: IRequests[];
+        department?: IDepartments;
+        department_id?: number;
+    }
+
+    export interface IRequests {
+        ID: string;
+        createdAt?: Date;
+        createdBy?: string;
+        modifiedAt?: Date;
+        modifiedBy?: string;
+        status?: Status;
+        reason: string;
+        user?: IUsers;
+        user_ID?: string;
+        startDay: Date;
+        endDay: Date;
+        isOutOfDay?: boolean;
+        comment?: string;
+        notification?: INotifications;
+    }
+
+    export interface INotifications {
+        ID: string;
+        createdAt?: Date;
+        createdBy?: string;
+        modifiedAt?: Date;
+        modifiedBy?: string;
+        sender?: IUsers;
+        sender_ID?: string;
+        receiver?: IUsers;
+        receiver_ID?: string;
+        message: string;
+        isRead?: boolean;
+        request?: IRequests;
+        request_ID?: string;
+    }
+
+    export interface IDepartments {
+        createdAt?: Date;
+        createdBy?: string;
+        modifiedAt?: Date;
+        modifiedBy?: string;
+        id: number;
+        departmentName: string;
+        isHRDepartment?: boolean;
+        members?: IUsers[];
+        isActive?: boolean;
+    }
+
+    export interface ICalendar {
+        ID: string;
+        createdAt?: Date;
+        createdBy?: string;
+        modifiedAt?: Date;
+        modifiedBy?: string;
+        startDay: Date;
+        endDay: Date;
+        holidayName: string;
     }
 
     export enum Entity {
-        Author = "cap.bookshop.typescript.Author",
-        Book = "cap.bookshop.typescript.Book",
-        Genre = "cap.bookshop.typescript.Genre",
+        Users = "vacation.Users",
+        Requests = "vacation.Requests",
+        Notifications = "vacation.Notifications",
+        Departments = "vacation.Departments",
+        Calendar = "vacation.Calendar",
     }
 
     export enum SanitizedEntity {
-        Author = "Author",
-        Book = "Book",
-        Genre = "Genre",
+        Users = "Users",
+        Requests = "Requests",
+        Notifications = "Notifications",
+        Departments = "Departments",
+        Calendar = "Calendar",
     }
 }
 
 export namespace sap.common {
-    export interface ICodeList {
+    export interface ILanguages {
         name: string;
         descr: string;
-    }
-
-    export interface ICountries extends sap.common.ICodeList {
         code: string;
+        texts: ITexts[];
+        localized?: ITexts;
     }
 
-    export interface ICurrencies extends sap.common.ICodeList {
-        code: string;
-        symbol: string;
-    }
-
-    export interface ILanguages extends sap.common.ICodeList {
-        code: string;
-    }
-
-    export enum Entity {
-        CodeList = "sap.common.CodeList",
-        Countries = "sap.common.Countries",
-        Currencies = "sap.common.Currencies",
-        Languages = "sap.common.Languages",
-    }
-
-    export enum SanitizedEntity {
-        CodeList = "CodeList",
-        Countries = "Countries",
-        Currencies = "Currencies",
-        Languages = "Languages",
-    }
-}
-
-export namespace CatalogService {
-    export interface IBook {
-        createdAt?: Date;
-        modifiedAt?: Date;
-        ID: number;
-        title: string;
+    export interface ICountries {
+        name: string;
         descr: string;
-        author: string;
-        genre?: IGenre;
-        genre_ID?: number;
-        stock: number;
-        price: number;
-        currency: ICurrencies;
-        currency_code?: string;
+        code: string;
+        texts: ITexts[];
+        localized?: ITexts;
     }
 
     export interface ICurrencies {
@@ -98,67 +125,205 @@ export namespace CatalogService {
         descr: string;
         code: string;
         symbol: string;
+        texts: ITexts[];
+        localized?: ITexts;
     }
 
-    export interface IGenre {
+    export interface ITexts {
+        locale: string;
         name: string;
         descr: string;
-        ID: number;
-        parent?: IGenre;
-        parent_ID?: number;
-        children: IGenre[];
+        code: string;
     }
 
-    export enum ActionSubmitOrder {
-        name = "submitOrder",
-        paramBook = "book",
-        paramAmount = "amount",
+    export interface ITexts {
+        locale: string;
+        name: string;
+        descr: string;
+        code: string;
     }
 
-    export interface IActionSubmitOrderParams {
-        book: number;
-        amount: number;
+    export interface ITexts {
+        locale: string;
+        name: string;
+        descr: string;
+        code: string;
     }
 
     export enum Entity {
-        Book = "CatalogService.Book",
-        Currencies = "CatalogService.Currencies",
-        Genre = "CatalogService.Genre",
+        Languages = "sap.common.Languages",
+        Countries = "sap.common.Countries",
+        Currencies = "sap.common.Currencies",
+        Texts = "sap.common.Currencies.texts",
     }
 
     export enum SanitizedEntity {
-        Book = "Book",
+        Languages = "Languages",
+        Countries = "Countries",
         Currencies = "Currencies",
-        Genre = "Genre",
+        Texts = "Texts",
+    }
+}
+
+export namespace UsersService {
+    export interface IUsers {
+        ID: string;
+        createdAt?: Date;
+        createdBy?: string;
+        modifiedAt?: Date;
+        modifiedBy?: string;
+        username: string;
+        password: string;
+        fullName: string;
+        isActive?: boolean;
+        address: string;
+        role?: vacation.Role;
+        refreshToken: string;
+        dayOffThisYear?: number;
+        dayOffLastYear?: number;
+        requests?: vacation.IRequests[];
+        department?: vacation.IDepartments;
+        department_id?: number;
+    }
+
+    export enum ActionLogin {
+        name = "login",
+        paramUsername = "username",
+        paramPassword = "password",
+    }
+
+    export interface IActionLoginParams {
+        username: string;
+        password: string;
+    }
+
+    export type ActionLoginReturn = string;
+
+    export enum Entity {
+        Users = "UsersService.Users",
+    }
+
+    export enum SanitizedEntity {
+        Users = "Users",
+    }
+}
+
+export namespace ManagerService {
+    export interface IUserManage {
+        ID: string;
+        createdAt?: Date;
+        createdBy?: string;
+        modifiedAt?: Date;
+        modifiedBy?: string;
+        username: string;
+        password: string;
+        fullName: string;
+        isActive?: boolean;
+        address: string;
+        role?: vacation.Role;
+        refreshToken: string;
+        dayOffThisYear?: number;
+        dayOffLastYear?: number;
+        requests?: IRequestManage[];
+        department?: IDepartments;
+        department_id?: number;
+    }
+
+    export interface IDepartments {
+        createdAt?: Date;
+        createdBy?: string;
+        modifiedAt?: Date;
+        modifiedBy?: string;
+        id: number;
+        departmentName: string;
+        isHRDepartment?: boolean;
+        members?: IUserManage[];
+        isActive?: boolean;
+    }
+
+    export interface ICalendar {
+        ID: string;
+        createdAt?: Date;
+        createdBy?: string;
+        modifiedAt?: Date;
+        modifiedBy?: string;
+        startDay: Date;
+        endDay: Date;
+        holidayName: string;
+    }
+
+    export interface IRequestManage {
+        ID: string;
+        createdAt?: Date;
+        createdBy?: string;
+        modifiedAt?: Date;
+        modifiedBy?: string;
+        status?: vacation.Status;
+        reason: string;
+        user?: IUserManage;
+        user_ID?: string;
+        startDay: Date;
+        endDay: Date;
+        isOutOfDay?: boolean;
+        comment?: string;
+        notification?: vacation.INotifications;
+    }
+
+    export enum ActionInviteMember {
+        name = "inviteMember",
+        paramMembers = "members",
+    }
+
+    export interface IActionInviteMemberParams {
+        members: string[];
+    }
+
+    export type ActionInviteMemberReturn = string;
+
+    export enum Entity {
+        UserManage = "ManagerService.UserManage",
+        Departments = "ManagerService.Departments",
+        Calendar = "ManagerService.Calendar",
+        RequestManage = "ManagerService.RequestManage",
+    }
+
+    export enum SanitizedEntity {
+        UserManage = "UserManage",
+        Departments = "Departments",
+        Calendar = "Calendar",
+        RequestManage = "RequestManage",
+    }
+}
+
+export namespace RequestsService {
+    export interface IRequests {
+        ID: string;
+        createdAt?: Date;
+        createdBy?: string;
+        modifiedAt?: Date;
+        modifiedBy?: string;
+        status?: vacation.Status;
+        reason: string;
+        user?: vacation.IUsers;
+        user_ID?: string;
+        startDay: Date;
+        endDay: Date;
+        isOutOfDay?: boolean;
+        comment?: string;
+        notification?: vacation.INotifications;
+    }
+
+    export enum Entity {
+        Requests = "RequestsService.Requests",
+    }
+
+    export enum SanitizedEntity {
+        Requests = "Requests",
     }
 }
 
 export type User = string;
 
-export interface ICuid {
-    ID: string;
-}
+export enum Entity {}
 
-export interface IManaged {
-    createdAt?: Date;
-    createdBy?: string;
-    modifiedAt?: Date;
-    modifiedBy?: string;
-}
-
-export interface ITemporal {
-    validFrom: Date;
-    validTo: Date;
-}
-
-export enum Entity {
-    Cuid = "cuid",
-    Managed = "managed",
-    Temporal = "temporal",
-}
-
-export enum SanitizedEntity {
-    Cuid = "Cuid",
-    Managed = "Managed",
-    Temporal = "Temporal",
-}
+export enum SanitizedEntity {}

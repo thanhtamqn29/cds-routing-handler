@@ -2,26 +2,35 @@ import "reflect-metadata";
 import express from "express";
 import { createCombinedHandler } from "cds-routing-handlers";
 import cds from "@sap/cds";
-
+import { HandleMiddleware } from "./middlewares/handler.middleware";
+import { getPath } from "./types/types";
 export class Server {
     public static async run() {
         const app = express();
 
-        const hdl = createCombinedHandler({
-            handler: [__dirname + "/entities/**/*.js", __dirname + "/functions/**/*.js"],
-        });
+        // const hdl = createCombinedHandler({
+        //     middlewares:[HandleMiddleware],
+        //     handler: [__dirname + "/entities/**/*.js", __dirname + "/functions/**/*.js"],
+        // });
 
         await cds.connect("db");
         await cds
             .serve("all")
-            .at("odata")
             .in(app)
-            .with(srv => hdl(srv));
-
-        // Redirect requests to the OData Service
-        app.get('/', function(req, res) {
-            res.redirect('/odata/')
-        })
+            .with((srv: getPath) => {
+                if (srv.path === "/auth") {
+                    const hdl = createCombinedHandler({
+                        handler: [__dirname + "/entities/**/*.js", __dirname + "/functions/**/*.js"],
+                    });
+                    return hdl(srv);
+                } else {
+                    const hdl = createCombinedHandler({
+                        middlewares: [HandleMiddleware],
+                        handler: [__dirname + "/entities/**/*.js", __dirname + "/functions/**/*.js"],
+                    });
+                    return hdl(srv);
+                }
+            });
 
         // Run the server.
         const port = process.env.PORT || 3001;
