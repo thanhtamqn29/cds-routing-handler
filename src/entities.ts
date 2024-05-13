@@ -208,6 +208,72 @@ export namespace UsersService {
     }
 }
 
+export namespace HrManagerService {
+    export interface IUsers {
+        ID: string;
+        createdAt?: Date;
+        createdBy?: string;
+        modifiedAt?: Date;
+        modifiedBy?: string;
+        username: string;
+        password: string;
+        fullName: string;
+        isActive?: boolean;
+        address: string;
+        role?: vacation.Role;
+        refreshToken: string;
+        dayOffThisYear?: number;
+        dayOffLastYear?: number;
+        requests?: IRequests[];
+        department?: vacation.IDepartments;
+        department_id?: number;
+    }
+
+    export interface IRequests {
+        ID: string;
+        createdAt?: Date;
+        createdBy?: string;
+        modifiedAt?: Date;
+        modifiedBy?: string;
+        status?: vacation.Status;
+        reason: string;
+        user?: IUsers;
+        user_ID?: string;
+        startDay: Date;
+        endDay: Date;
+        isOutOfDay?: boolean;
+        comment?: string;
+        notification?: vacation.INotifications;
+    }
+
+    export enum FuncGetRequestsForHR {
+        name = "getRequestsForHR",
+        paramStaffName = "staffName",
+        paramDepartment = "department",
+        paramStartDay = "startDay",
+        paramEndDay = "endDay",
+    }
+
+    export interface IFuncGetRequestsForHRParams {
+        staffName: string;
+        department: string;
+        startDay: string;
+        endDay: string;
+    }
+
+    export type FuncGetRequestsForHRReturn = string;
+
+    export enum Entity {
+        Users = "HrManagerService.Users",
+        Requests = "HrManagerService.Requests",
+    }
+
+    export enum SanitizedEntity {
+        Users = "Users",
+        Requests = "Requests",
+    }
+}
+
 export namespace ManagerService {
     export interface IUserManage {
         ID: string;

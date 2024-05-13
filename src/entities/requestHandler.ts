@@ -20,7 +20,7 @@ import { cds_ql } from "@sap/cds/apis/ql";
 import { notify } from "../helpers/notification";
 @Handler(RequestsService.SanitizedEntity.Requests)
 @Use(HandleMiddleware)
-export class BookHandler {
+export class RequestHandler {
     @BeforeCreate()
     @BeforeUpdate()
     public async checkrequestHandler(@Req() req: any): Promise<void> {
