@@ -27,12 +27,19 @@ export class RequestHandler {
         const startDay = new Date(req.data.startDay);
         const endDay = new Date(req.data.endDay);
         const currentDate = new Date();
-
-        if (startDay < currentDate || endDay < currentDate) {
-            return req.error(400, "Start day and end day must be after the current date.", "");
-        } else if (startDay >= endDay) {
-            return req.error(400, "End day must be after start day.", "");
+        if (req.data.dayOffType === "PERIOD_TIME") {
+            if (startDay < currentDate || endDay < currentDate) {
+                return req.error(400, "Start day and end day must be after the current date.", "");
+            } else if (startDay >= endDay) {
+                return req.error(400, "End day must be after start day.", "");
+            }
         }
+        if (req.data.dayOffType === "HALF_DAY") {
+            if (req.data.leavePeriod === null || req.data.leavePeriod === undefined) {
+                return req.error(400, "Please, Enter leave Period !", "");
+            }
+        }
+       
     }
 
     @AfterCreate()
@@ -119,7 +126,7 @@ export class RequestHandler {
     }
 
     @BeforeDelete()
-    public async deleteHanler(@Req() req: any): Promise<any> {
+    public async deleteHandler(@Req() req: any): Promise<any> {
         try {
             const findRequest = await SELECT.one.from("Requests").where({ ID: req.data.ID });
             if (!findRequest) {

@@ -31,18 +31,19 @@ entity Users : cuid, managed {
                          on requests.user = $self;
     department     : Association to one Departments;
 }
-
 entity Requests : cuid, managed {
     status       : Status default 'pending';
     reason       : String;
     user         : Association to Users;
     startDay     : Date;
     endDay       : Date;
+    dayOffType   : String enum {FULL_DAY; HALF_DAY; PERIOD_TIME};
     isOutOfDay   : Boolean default false;
     comment      : String default '';
-    notification : Association to Notifications
-                       on notification.request = $self;
+    leavePeriod  : String enum { MORNING; AFTERNOON };
+    notification : Association to Notifications on notification.request = $self;
 }
+
 
 
 entity Notifications : cuid, managed {

@@ -1,5 +1,7 @@
 export const notify = async (response: any, action: string) => {
     const { data, authentication } = response;
+
+    
     const getUser = await cds.ql.SELECT.one.from("Users").where({ ID: data.user_ID });
 
     const getManager = await cds.ql.SELECT.one.from("Users").where({ department_id: getUser.department_id, role: "manager" });
@@ -25,24 +27,19 @@ export const notify = async (response: any, action: string) => {
 };
 
 export const flaggedNotification = async (response: any, authentication: any) => {
-
     try {
         await cds.ql
-        .UPDATE("Notifications")
-        .set({
-            isRead: true,
-        })
-        .where({
-            ID: response.ID,
-            receiver_ID: authentication.id,
-        });
-
+            .UPDATE("Notifications")
+            .set({
+                isRead: true,
+            })
+            .where({
+                ID: response.ID,
+                receiver_ID: authentication.id,
+            });
     } catch (error) {
-        return error.message
+        return error.message;
     }
-      
-      
-    
 };
 
 const responseMessage = (name: string, action: string, reason: string): string => {

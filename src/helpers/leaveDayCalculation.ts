@@ -43,7 +43,7 @@ export const calculateVacationDays = async (user_id : string) => {
       if (createdAt.getFullYear() === currentYear) {
         const endOfYear = new Date(currentYear, 11, 31);
         const monthsPassed = endOfYear.getMonth() - createdAt.getMonth();
-        const dayOffThisYear = monthsPassed * 1.25;
+        const dayOffThisYear = monthsPassed * 1.25; 
         await cds.ql.UPDATE("Users")
           .set({ dayOffThisYear: dayOffThisYear })
           .where({ ID: user_id });
@@ -58,20 +58,21 @@ export const calculateVacationDays = async (user_id : string) => {
     let currentDate = new Date(startDay);
     for (
       let date = currentDate;
-      date <= endDay;
+      date <= new Date(endDay);
       date.setDate(date.getDate() + 1)
-    ) {
+    ) {     
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, "0");
       const day = String(date.getDate()).padStart(2, "0");
       days.push(`${year}-${month}-${day}`);
     }
-  
     const weekDays = days.filter((day) => {
       const date = new Date(day);
       const dayOfWeek = date.getDay();
       return dayOfWeek !== 0 && dayOfWeek !== 6;
     });
+    console.log("weekDays",weekDays);
+    
     return weekDays;
   };
   
@@ -83,6 +84,8 @@ export const calculateVacationDays = async (user_id : string) => {
   
     for (let date = startDay; date <= endDay; date.setDate(date.getDate() + 1)) {
       if (date.getDay() !== 0 && date.getDay() !== 6) {
+        console.log(date.getMonth());
+        
         if (date.getMonth() < 3) {
           daysBeforeApril++;
         } else if (date.getMonth() === 3) {
@@ -110,6 +113,18 @@ export const calculateVacationDays = async (user_id : string) => {
       totalHoliday.push(...holidayTerm);
     });
     offDays = offDays.filter((day) => !totalHoliday.includes(day));
-  
+    console.log("offDays",offDays);
+    
     return offDays;
   };
+  export const filterDaysInCurrentMonth = async (days) =>{
+    const currentMonth = new Date().getMonth() + 1;
+    const currentYear = new Date().getFullYear();
+    return days.filter((day) => {
+      const month = new Date(day).getMonth() + 1;
+      const year = new Date(day).getFullYear();
+      return month === currentMonth && year === currentYear;
+    });
+  };
+
+

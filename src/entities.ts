@@ -30,6 +30,17 @@ export namespace vacation {
         department_id?: number;
     }
 
+    export enum RequestsDayOffType {
+        FULL_DAY,
+        HALF_DAY,
+        PERIOD_TIME,
+    }
+
+    export enum RequestsLeavePeriod {
+        MORNING,
+        AFTERNOON,
+    }
+
     export interface IRequests {
         ID: string;
         createdAt?: Date;
@@ -42,8 +53,10 @@ export namespace vacation {
         user_ID?: string;
         startDay: Date;
         endDay: Date;
+        dayOffType: RequestsDayOffType;
         isOutOfDay?: boolean;
         comment?: string;
+        leavePeriod: RequestsLeavePeriod;
         notification?: INotifications;
     }
 
@@ -229,6 +242,17 @@ export namespace HrManagerService {
         department_id?: number;
     }
 
+    export enum RequestsDayOffType {
+        FULL_DAY,
+        HALF_DAY,
+        PERIOD_TIME,
+    }
+
+    export enum RequestsLeavePeriod {
+        MORNING,
+        AFTERNOON,
+    }
+
     export interface IRequests {
         ID: string;
         createdAt?: Date;
@@ -241,36 +265,44 @@ export namespace HrManagerService {
         user_ID?: string;
         startDay: Date;
         endDay: Date;
+        dayOffType: RequestsDayOffType;
         isOutOfDay?: boolean;
         comment?: string;
+        leavePeriod: RequestsLeavePeriod;
         notification?: vacation.INotifications;
     }
 
-    export enum FuncGetRequestsForHR {
-        name = "getRequestsForHR",
-        paramStaffName = "staffName",
-        paramDepartment = "department",
-        paramStartDay = "startDay",
-        paramEndDay = "endDay",
+    export interface IUserRequests {
+        request_ID: string;
+        request_status?: vacation.Status;
+        user_ID: string;
+        username: string;
+        role?: vacation.Role;
+        id: number;
+        departmentName: string;
+        isHRDepartment?: boolean;
+        startDay: Date;
+        endDay: Date;
+        reason: string;
+        comment?: string;
     }
 
-    export interface IFuncGetRequestsForHRParams {
-        staffName: string;
-        department: string;
-        startDay: string;
-        endDay: string;
+    export enum FuncExportExcel {
+        name = "exportExcel",
     }
 
-    export type FuncGetRequestsForHRReturn = string;
+    export type FuncExportExcelReturn = string;
 
     export enum Entity {
         Users = "HrManagerService.Users",
         Requests = "HrManagerService.Requests",
+        UserRequests = "HrManagerService.UserRequests",
     }
 
     export enum SanitizedEntity {
         Users = "Users",
         Requests = "Requests",
+        UserRequests = "UserRequests",
     }
 }
 
@@ -318,6 +350,17 @@ export namespace ManagerService {
         holidayName: string;
     }
 
+    export enum RequestManageDayOffType {
+        FULL_DAY,
+        HALF_DAY,
+        PERIOD_TIME,
+    }
+
+    export enum RequestManageLeavePeriod {
+        MORNING,
+        AFTERNOON,
+    }
+
     export interface IRequestManage {
         ID: string;
         createdAt?: Date;
@@ -330,8 +373,10 @@ export namespace ManagerService {
         user_ID?: string;
         startDay: Date;
         endDay: Date;
+        dayOffType: RequestManageDayOffType;
         isOutOfDay?: boolean;
         comment?: string;
+        leavePeriod: RequestManageLeavePeriod;
         notification?: vacation.INotifications;
     }
 
@@ -362,6 +407,17 @@ export namespace ManagerService {
 }
 
 export namespace RequestsService {
+    export enum RequestsDayOffType {
+        FULL_DAY,
+        HALF_DAY,
+        PERIOD_TIME,
+    }
+
+    export enum RequestsLeavePeriod {
+        MORNING,
+        AFTERNOON,
+    }
+
     export interface IRequests {
         ID: string;
         createdAt?: Date;
@@ -374,8 +430,10 @@ export namespace RequestsService {
         user_ID?: string;
         startDay: Date;
         endDay: Date;
+        dayOffType: RequestsDayOffType;
         isOutOfDay?: boolean;
         comment?: string;
+        leavePeriod: RequestsLeavePeriod;
         notification?: vacation.INotifications;
     }
 

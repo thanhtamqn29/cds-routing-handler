@@ -32,7 +32,6 @@ export class ManageHandler {
     public async validManager(@Req() req: any) {
         const { authentication } = req;
         const request = await cds.ql.SELECT.one.from("Requests").where({ ID: req.params[0] });
-        console.log(request);
 
         if (!request) req.error(404, "Couldn't find this request", "");
 
@@ -52,39 +51,108 @@ export class ManageHandler {
         const request = await cds.ql.SELECT.one.from("Requests").where({ ID: req.params[0] });
         const user = await cds.ql.SELECT.one.from("Users").where({ ID: authentication.id });
 
-        let endDay = new Date(request.endDay + "T23:59:59Z");
-        let startDay = new Date(request.startDay + "T00:00:00Z");
+        const userRequest = await cds.ql.SELECT.one.from("Users").where({ ID: request.user_ID});
 
+        let endDay = request.endDay;
+        let startDay = request.startDay;
+
+        if(endDay === null){endDay = startDay;};
         const removeWeekend = getAllDaysBetween(startDay, endDay);
         const removeHoliday = await removeHolidays(removeWeekend);
 
         startDay = new Date(request.startDay + "T00:00:00Z");
         endDay = new Date(request.endDay + "T23:59:59Z");
+        
+        const startDayMonth = startDay.getMonth() + 1;
+        const endDayMonth = endDay.getMonth() + 1;
 
-        const startDayMonth = startDay.getMonth();
-        const endDayMonth = endDay.getMonth();
+        if (request.dayOffType === "HALF_DAY") {
+            if (startDayMonth > 3) {
+                await cds.ql
+                    .UPDATE("Users")
+                    .where({ ID: request.user_ID })
+                    .set({
+                        dayOffThisYear: { "-=": removeHoliday.length / 2 },
+                    });
+            } else {
+                if (userRequest.dayOffLastYear > 0) {
+                    if(userRequest.dayOffLastYear< 0.5){
+                        console.log(0.5 -userRequest.dayOffLastYear);
+                        
+                        await cds.ql
+                            .UPDATE("Users")
+                            .where({ ID: userRequest.ID })
+                            .set({                                      
+                                dayOffThisYear: { "-=": 0.5 -userRequest.dayOffLastYear },
+                                dayOffLastYear: 0,
+                            });
+                    }else{
+                    await cds.ql
+                        .UPDATE("Users")
+                        .where({ ID: request.user_ID })
+                        .set({
+                            dayOffLastYear: { "-=": removeHoliday.length / 2 },
+                        });
+                    };
+                } else {
+                    await cds.ql
+                        .UPDATE("Users")
+                        .where({ ID: request.user_ID })
+                        .set({
+                            dayOffThisYear: { "-=": removeHoliday.length / 2 },
+                        });
+                };
+            };
+        };
 
-        if (startDayMonth >= 3) user.dayOffLastYear = 0;
+        if (request.dayOffType === "FULL_DAY") {
+            if (startDayMonth > 3) {
+                await cds.ql
+                    .UPDATE("Users")
+                    .where({ ID: userRequest.ID })
+                    .set({
+                        dayOffThisYear: { "-=": removeHoliday.length },
+                    });
+            } else {
+                if (userRequest.dayOffLastYear > 0) {
+                    if(userRequest.dayOffLastYear< 1){  
+                        await cds.ql
+                            .UPDATE("Users")
+                            .where({ ID: userRequest.ID })
+                            .set({                                      
+                                dayOffThisYear: { "-=": 1 -userRequest.dayOffLastYear },
+                                dayOffLastYear: 0,
+                            });
+                    }else{
+                    await cds.ql
+                        .UPDATE("Users")
+                        .where({ ID: request.user_ID })
+                        .set({
+                            dayOffLastYear: { "-=": removeHoliday.length  },
+                        });
+                    };
+                } else {
+                    await cds.ql
+                        .UPDATE("Users")
+                        .where({ ID: request.user_ID })
+                        .set({
+                            dayOffThisYear: { "-=": removeHoliday.length  },
+                        });
+                };
+            };
+        };
 
-        if (!user.dayOffLastYear) {
-            await cds.ql
-                .UPDATE("Users")
-                .where({ ID: request.user_ID })
-                .set({
-                    dayOffLastYear: 0,
-                    dayOffThisYear: { "-=": removeHoliday.length },
-                });
-        } else {
+        if (request.dayOffType === "PERIOD_TIME") {
             if (startDayMonth < 3 && endDayMonth == 3) {
                 const { daysBeforeApril, daysAfterApril } = getDaysBeforeAfterApril(removeHoliday);
-                const newDayOffLastYear = user.dayOffLastYear - daysBeforeApril;
+                const newDayOffLastYear = userRequest.dayOffLastYear - daysBeforeApril;
 
                 await cds.ql
                     .UPDATE("Users")
                     .set({ dayOffThisYear: { "-=": daysAfterApril } })
-                    .where({ ID: user.ID });
+                    .where({ ID: userRequest.ID });
 
-                if (newDayOffLastYear >= 0) await cds.ql.UPDATE("Users").set({ dayOffLastYear: newDayOffLastYear }).where({ ID: user.ID });
+                if (newDayOffLastYear >= 0) await cds.ql.UPDATE("Users").set({ dayOffLastYear: newDayOffLastYear }).where({ ID: userRequest.ID });
 
                 if (newDayOffLastYear < 0)
                     await cds.ql
@@ -93,15 +161,15 @@ export class ManageHandler {
                             dayOffLastYear: 0,
                             dayOffThisYear: { "+=": newDayOffLastYear },
                         })
-                        .where({ ID: user.ID });
+                        .where({ ID: userRequest.ID });
             } else {
-                const newDayOffLastYear = user.dayOffLastYear - removeHoliday.length;
+                const newDayOffLastYear = userRequest.dayOffLastYear - removeHoliday.length;
 
                 if (newDayOffLastYear >= 0)
                     await cds.ql
                         .UPDATE("Users")
                         .set({ dayOffLastYear: { "-=": removeHoliday.length } })
-                        .where({ ID: user.ID });
+                        .where({ ID: userRequest.ID });
 
                 if (newDayOffLastYear < 0)
                     await cds.ql
@@ -110,14 +178,15 @@ export class ManageHandler {
                             dayOffLastYear: 0,
                             dayOffThisYear: { "+=": newDayOffLastYear },
                         })
-                        .where({ ID: user.ID });
+                        .where({ ID: userRequest.ID });
             }
         }
-        const response = await cds.ql.SELECT.one.from("Requests").where({ ID: req.params[0] });
-        await notify({ response, authentication }, response.status);
+        const data = await cds.ql.SELECT.one.from("Requests").where({ ID: req.params[0] });
+        
+        await notify({ data, authentication }, data.status);
         return req.reply({
-            code: 200,
-            message: "Updated successfully",
-        });
+            massage:"updated successfully"
+        })
+     
     }
 }
